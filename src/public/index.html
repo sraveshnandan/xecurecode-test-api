@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XecureCode Test API</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1e293b, #0f172a); border-bottom: 1px solid #334155; padding: 1.5rem 2rem; }
+  header h1 { font-size: 1.5rem; font-weight: 600; }
+  header p { color: #94a3b8; margin-top: 0.25rem; font-size: 0.875rem; }
+  header span { color: #22c55e; }
+  main { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+  section { margin-bottom: 2rem; }
+  section h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.75rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+  .btn { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 1rem; border: 1px solid #334155; border-radius: 8px; background: #1e293b; color: #e2e8f0; cursor: pointer; font-size: 0.875rem; transition: all 0.15s; }
+  .btn:hover { border-color: #6366f1; background: #1e293b; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn .badge { font-size: 0.7rem; padding: 0.125rem 0.5rem; border-radius: 999px; color: #94a3b8; border: 1px solid #334155; }
+  .cat-runtime .btn:hover { border-color: #ef4444; }
+  .cat-infra .btn:hover { border-color: #f59e0b; }
+  .cat-biz .btn:hover { border-color: #3b82f6; }
+  .cat-crash .btn:hover { border-color: #dc2626; }
+  .cat-rollback .btn:hover { border-color: #a855f7; }
+  #log { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem; max-height: 400px; overflow-y: auto; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.8rem; }
+  #log .entry { padding: 0.5rem; border-bottom: 1px solid #1e293b; }
+  #log .entry:last-child { border-bottom: none; }
+  #log .time { color: #64748b; }
+  #log .ok { color: #22c55e; }
+  #log .fail { color: #ef4444; }
+  #log .info { color: #3b82f6; }
+  #clear-log { float: right; padding: 0.25rem 0.75rem; background: #1e293b; border: 1px solid #334155; border-radius: 4px; color: #94a3b8; cursor: pointer; font-size: 0.75rem; }
+  #clear-log:hover { color: #ef4444; border-color: #ef4444; }
+  .status-bar { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #1e293b; border-radius: 8px; font-size: 0.8rem; }
+  .status-bar strong { color: #94a3b8; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #334155; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>XecureCode Test API</h1>
+  <p>Service: <code>f584aeae-3b3f-4c1c-9f8a-4a16498db564</code> · SDK: <span>Connected</span></p>
+</header>
+<main>
+  <div class="status-bar">
+    <span><strong>Endpoint:</strong> <span id="endpoint-url">loading...</span></span>
+    <span><strong>SDK:</strong> <span id="sdk-status" style="color:#22c55e">Active</span></span>
+  </div>
+
+  <section class="cat-runtime">
+    <h2>Runtime Errors</h2>
+    <div class="grid">
+      <button class="btn" onclick="hit('/errors/runtime')">Runtime <span class="badge">TypeError</span></button>
+      <button class="btn" onclick="hit('/errors/type-error')">Type Error <span class="badge">.toUpperCase()</span></button>
+      <button class="btn" onclick="hit('/errors/reference-error')">Reference Error <span class="badge">undefined fn</span></button>
+      <button class="btn" onclick="hit('/errors/timeout')">Request Timeout <span class="badge">30s</span></button>
+      <button class="btn" onclick="hit('/errors/slow')">Slow Request <span class="badge">25s</span></button>
+    </div>
+  </section>
+
+  <section class="cat-infra">
+    <h2>Infrastructure</h2>
+    <div class="grid">
+      <button class="btn" onclick="hit('/errors/database')">DB Timeout <span class="badge">pool exhausted</span></button>
+      <button class="btn" onclick="hit('/errors/network')">Network Error <span class="badge">502 Bad Gateway</span></button>
+      <button class="btn" onclick="hit('/errors/memory')">Memory Spike <span class="badge">heap &gt; 90%</span></button>
+    </div>
+  </section>
+
+  <section class="cat-biz">
+    <h2>Business Logic</h2>
+    <div class="grid">
+      <button class="btn" onclick="hit('/errors/validation')">Validation <span class="badge">400</span></button>
+      <button class="btn" onclick="hit('/errors/auth')">Auth Failure <span class="badge">401</span></button>
+      <button class="btn" onclick="hit('/errors/forbidden')">Forbidden <span class="badge">403</span></button>
+    </div>
+  </section>
+
+  <section class="cat-crash">
+    <h2>Crash Scenarios</h2>
+    <div class="grid">
+      <button class="btn" onclick="hit('/errors/crash')">Uncaught Exception <span class="badge">process.nextTick</span></button>
+      <button class="btn" onclick="hit('/errors/rejection')">Unhandled Rejection <span class="badge">Promise</span></button>
+      <button class="btn" onclick="hit('/errors/panic')">Panic / Exit <span class="badge">process.exit(1)</span></button>
+    </div>
+  </section>
+
+  <section class="cat-rollback">
+    <h2>Rollback Testing</h2>
+    <div class="grid">
+      <button class="btn" onclick="post('/rollback/deploy')">Deploy New Version <span class="badge">40% fail rate</span></button>
+      <button class="btn" onclick="hit('/rollback/simulate')">Simulate Request <span class="badge">random pass/fail</span></button>
+      <button class="btn" onclick="hit('/rollback/status')">Rollback Status <span class="badge">check state</span></button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Log <button id="clear-log" onclick="clearLog()">Clear</button></h2>
+    <div id="log"><div class="entry"><span class="time">—</span> <span class="info">Click any button to trigger</span></div></div>
+  </section>
+</main>
+
+<script>
+  document.getElementById('endpoint-url').textContent = window.location.origin;
+
+  function log(status, text, detail) {
+    const el = document.getElementById('log');
+    const time = new Date().toLocaleTimeString();
+    const cls = status === 200 ? 'ok' : status >= 400 ? 'fail' : 'info';
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    entry.innerHTML = `<span class="time">${time}</span> [<span class="${cls}">${status}</span>] ${text}${detail ? ' <span class="time">' + detail + '</span>' : ''}`;
+    el.prepend(entry);
+    el.scrollTop = 0;
+  }
+
+  async function hit(url) {
+    const btn = event.target.closest('.btn');
+    if (btn) btn.style.opacity = '0.5';
+    const start = Date.now();
+    try {
+      const res = await fetch(url);
+      const body = await res.text();
+      log(res.status, url, (Date.now() - start) + 'ms');
+    } catch (e) {
+      log(0, url, 'Failed: ' + e.message);
+    }
+    if (btn) btn.style.opacity = '1';
+  }
+
+  async function post(url) {
+    const start = Date.now();
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      const body = await res.text();
+      log(res.status, 'POST ' + url, (Date.now() - start) + 'ms');
+    } catch (e) {
+      log(0, 'POST ' + url, 'Failed: ' + e.message);
+    }
+  }
+
+  function clearLog() {
+    document.getElementById('log').innerHTML = '<div class="entry"><span class="time">—</span> <span class="info">Log cleared</span></div>';
+  }
+</script>
+</body>
+</html>
