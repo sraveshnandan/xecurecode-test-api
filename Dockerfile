@@ -4,13 +4,11 @@ RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
 WORKDIR /app
 
-COPY package.json ./
-RUN pnpm install
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-COPY tsconfig.json ./
-COPY src ./src
-RUN pnpm build
+COPY . .
 
-EXPOSE 4001
+EXPOSE ${PORT:-4001}
 
-CMD ["node", "dist/index.js"]
+CMD ["pnpm", "start"]
