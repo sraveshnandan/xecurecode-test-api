@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 4001;
 const client = new ReliabilityClient({
   apiKey: process.env.XECURECODE_API_KEY!,
   service_id: process.env.XECURECODE_SERVICE_ID!,
+  endpoint: process.env.XECURECODE_ENDPOINT || "https://backend.xecurecode.in/api/v1/ingest",
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   version: process.env.VERSION || "1.0.0",
   release: process.env.RELEASE || "v1.0.0",
