@@ -24,6 +24,7 @@
   .cat-biz .btn:hover { border-color: #3b82f6; }
   .cat-crash .btn:hover { border-color: #dc2626; }
   .cat-rollback .btn:hover { border-color: #a855f7; }
+  .cat-rca .btn:hover { border-color: #06b6d4; }
   #log { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem; max-height: 400px; overflow-y: auto; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.8rem; }
   #log .entry { padding: 0.5rem; border-bottom: 1px solid #1e293b; }
   #log .entry:last-child { border-bottom: none; }
@@ -88,11 +89,21 @@
     </div>
   </section>
 
+  <section class="cat-rca">
+    <h2>RCA Testing</h2>
+    <div class="grid">
+      <button class="btn" onclick="post('/rca/deploy')">RCA Deploy <span class="badge">new version</span></button>
+      <button class="btn" onclick="post('/rca/trigger-failures')">Trigger Failures <span class="badge">burst of errors</span></button>
+      <button class="btn" onclick="hit('/rca/failures')">RCA Status <span class="badge">failure count</span></button>
+    </div>
+  </section>
+
   <section class="cat-rollback">
     <h2>Rollback Testing</h2>
     <div class="grid">
       <button class="btn" onclick="post('/rollback/deploy')">Deploy New Version <span class="badge">40% fail rate</span></button>
       <button class="btn" onclick="hit('/rollback/simulate')">Simulate Request <span class="badge">random pass/fail</span></button>
+      <button class="btn" onclick="post('/rollback/manual')">Manual Rollback <span class="badge">revert deployment</span></button>
       <button class="btn" onclick="hit('/rollback/status')">Rollback Status <span class="badge">check state</span></button>
     </div>
   </section>

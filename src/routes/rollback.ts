@@ -1,7 +1,7 @@
 import { Router } from "express";
 import type { ReliabilityClient } from "@xecurecode-sdks/reliability-sdk";
 
-let deployments: Array<{ version: string; healthy: boolean; failures: number }> = [];
+let deployments: Array<{ version: string; healthy: boolean; failures: number; rolledBack?: boolean }> = [];
 let currentVersion = 1;
 let failRate = 0;
 let consecutiveFails = 0;
@@ -61,6 +61,26 @@ export function rollbackRoutes(client: ReliabilityClient) {
       deployments,
       failRate,
       consecutiveFails,
+    });
+  });
+
+  router.post("/manual", (_req, res) => {
+    const current = deployments[deployments.length - 1];
+    if (current) {
+      current.rolledBack = true;
+      current.healthy = false;
+    }
+
+    client.capture(new Error(`Manual rollback triggered for v1.0.${currentVersion} — reverting to previous stable`));
+
+    failRate = 0;
+    consecutiveFails = 0;
+
+    res.json({
+      ok: true,
+      version: `1.0.${currentVersion}`,
+      rolledBack: true,
+      message: "Manual rollback executed — deployment marked as rolled back on dashboard",
     });
   });
 
